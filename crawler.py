@@ -1,4 +1,3 @@
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,6 +12,7 @@ from bs4 import BeautifulSoup
 import datetime
 import json
 import sys
+import os
 
 try:
     with open('config.json') as f:
@@ -116,13 +116,18 @@ for course in courses:
 
             instance_contents = title_element.text.split('\n')
             if len(instance_contents) > 1 and instance_contents[1] == '동영상':
-                time_element = instance_element.find_element_by_css_selector(
-                    'span.displayoptions > span:nth-child(1)')
-                playtime_element = instance_element.find_element_by_css_selector(
-                    'span.displayoptions > span:nth-child(2)')
-
-                instances.append({'title': title_element.text.split(
-                    '\n')[0], 'time': time_element.text[1:], 'playtime': playtime_element.text[2:]})
+                try:
+                    time_element = instance_element.find_element_by_css_selector(
+                        'span.displayoptions > span:nth-child(1)')
+                    playtime_element = instance_element.find_element_by_css_selector(
+                        'span.displayoptions > span:nth-child(2)')
+                    instances.append({'title': title_element.text.split(
+                        '\n')[0], 'time': time_element.text[1:], 'playtime': playtime_element.text[2:]})
+                except:
+                    playtime_element = instance_element.find_element_by_css_selector(
+                        'span.displayoptions > span:nth-child(1)')
+                    instances.append({'title': title_element.text.split(
+                        '\n')[0], 'time': "", 'playtime': playtime_element.text[2:]})
                 # print("[INSTANCE] " + instances[-1]['title'])
         course['instances'] = instances
     else:
@@ -199,8 +204,8 @@ for course in courses:
             index += 1
             print("  [%s] %s (%s) " %
                   (ox, instance['title'], instance['playtime']), end="")
-            if ox == 'X':
-                time = instance['time']
+            time = instance['time']
+            if ox == 'X' and time != "":
                 time = time[time.find('~')+2:time.find('(')-1]
                 remain_time = datetime.datetime.strptime(
                     time, '%Y-%m-%d %H:%M:%S') - now
