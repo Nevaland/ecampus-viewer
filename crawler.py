@@ -28,6 +28,7 @@ except FileNotFoundError:
     with open('config.json', 'w') as f:
         json.dump(CONFIG, f)
 
+print("Crawling Data...")
 
 URL = CONFIG['url'] + '/login.php'
 options = webdriver.ChromeOptions()
@@ -106,11 +107,13 @@ for course in courses:
         course['week'] = 6
         course['week-title'] = this_week_element[0].get_attribute('aria-label')
 
-        instance_elements = this_week_element[0].find_elements_by_css_selector(
-            'div.content > ul > li > div > div > div:nth-child(2) > div')
+        instance_list_elements = this_week_element[0].find_elements_by_css_selector(
+            'div.content > ul > li')
 
         instances = list()
-        for instance_element in instance_elements:
+        for instance_list_element in instance_list_elements:
+            instance_element = instance_list_element.find_element_by_css_selector(
+                'div > div > div:nth-child(2) > div')
             title_element = instance_element.find_element_by_css_selector(
                 'a > span')
 
@@ -124,10 +127,7 @@ for course in courses:
                     instances.append({'title': title_element.text.split(
                         '\n')[0], 'time': time_element.text[1:], 'playtime': playtime_element.text[2:]})
                 except:
-                    playtime_element = instance_element.find_element_by_css_selector(
-                        'span.displayoptions > span:nth-child(1)')
-                    instances.append({'title': title_element.text.split(
-                        '\n')[0], 'time': "", 'playtime': playtime_element.text[2:]})
+                    pass
                 # print("[INSTANCE] " + instances[-1]['title'])
         course['instances'] = instances
     else:
@@ -189,6 +189,7 @@ for course in courses:
 
     course['tasks'] = tasks
 
+print("-----------------------------")
 print("※ 공지사항")
 for notice in notices:
     print("[%s] %s" % (notice['date'], notice['title']))
@@ -196,7 +197,7 @@ for notice in notices:
 now = datetime.datetime.now()
 print("\n※ 이번 주차 출석 현황")
 for course in courses:
-    if course['week']:
+    if course['week'] and course['attendances'][course['week']] != [{"title": " ", "ox": " "}]:
         print("%s. %s" % (course['id'], course['title']))
         index = 0
         for instance in course['instances']:
@@ -215,14 +216,16 @@ for course in courses:
             else:
                 print("")
 
-        for task_contents in course['tasks'][course['week']]:
-            if task_contents['submit'] == "제출 완료":
-                print("    [O] %s" % (task_contents['title']))
-            else:
-                time = task_contents['deadline']
-                remain_time = datetime.datetime.strptime(
-                    time, '%Y-%m-%d %H:%M') - now
-                remain_time_text = "%d일 %d시간" % (
-                    remain_time.days, remain_time.seconds // 3600)
-                print("    [X] %s [남은 시간 %s]" %
-                      (task_contents['title'], remain_time_text))
+        if course['tasks'] != {1: []} and course['tasks'].get(course['week']):
+            for task_contents in course['tasks'][course['week']]:
+                if task_contents['submit'] == "제출 완료":
+                    print("    [O] %s" % (task_contents['title']))
+                else:
+                    time = task_contents['deadline']
+                    remain_time = datetime.datetime.strptime(
+                        time, '%Y-%m-%d %H:%M') - now
+                    remain_time_text = "%d일 %d시간" % (
+                        remain_time.days, remain_time.seconds // 3600)
+                    print("    [X] %s [남은 시간 %s]" %
+                          (task_contents['title'], remain_time_text))
+print("-----------------------------")
