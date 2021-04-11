@@ -18,15 +18,15 @@ try:
     with open('config.json') as f:
         CONFIG = json.load(f)
 except FileNotFoundError:
-    config = {
+    ecampus_id = input("ID: ")
+    ecampus_password = input("Password: ")
+    CONFIG = {
         "url": "https://ecampus.changwon.ac.kr",
-        "id": "",
-        "password": ""
+        "id": ecampus_id,
+        "password": ecampus_password
     }
     with open('config.json', 'w') as f:
-        json.dump(config, f)
-    print("[+] Generate config File. Please enter data")
-    exit()
+        json.dump(CONFIG, f)
 
 
 URL = CONFIG['url'] + '/login.php'
