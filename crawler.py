@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 import datetime
 import json
+import sys
 
 try:
     with open('config.json') as f:
@@ -36,7 +37,14 @@ options.add_argument('--disable-logging')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-gpu')
 
-driver = webdriver.Chrome(executable_path='chromedriver', options=options)
+if getattr(sys, 'frozen', False):
+    chromedriver_path = os.path.join(sys._MEIPASS, "chromedriver.exe")
+    driver = webdriver.Chrome(
+        executable_path=chromedriver_path, options=options)
+else:
+    driver = webdriver.Chrome(
+        executable_path="chromedriver", options=options)
+
 driver.implicitly_wait(3)
 driver.get(url=URL)
 
