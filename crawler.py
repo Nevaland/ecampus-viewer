@@ -104,7 +104,8 @@ for course in courses:
     if this_week_element:
         # print("["+course['id']+":WEEKS] " +
         #       this_week_element[0].get_attribute('aria-label'))
-        course['week'] = 6
+        course['week'] = int(this_week_element[0].get_attribute(
+            'id').replace('section-', ''))
         course['week-title'] = this_week_element[0].get_attribute('aria-label')
 
         instance_list_elements = this_week_element[0].find_elements_by_css_selector(
