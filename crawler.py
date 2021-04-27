@@ -246,7 +246,6 @@ if isViewing:
                 ox = course['attendances'][course['week']][index]['ox']
                 index += 1
                 time = instance['time']
-                ox = 'X'
                 if ox == 'X' and time != "":
                     print("  [%s] %s 영상을 시청합니다. (%s)" %
                           (ox, instance['title'], instance['playtime']))
@@ -265,7 +264,7 @@ if isViewing:
 
                     sleep(3)
                     try:
-                        alert = driver.switch_to.alert
+                        alert = driver.switch_to.aledrt
                         alert.accept()
                         # print("Alert 2")
                     except:
