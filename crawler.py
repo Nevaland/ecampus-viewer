@@ -13,6 +13,7 @@ import datetime
 import json
 import sys
 import os
+from time import sleep
 
 try:
     with open('config.json') as f:
@@ -125,8 +126,10 @@ for course in courses:
                         'span.displayoptions > span:nth-child(1)')
                     playtime_element = instance_element.find_element_by_css_selector(
                         'span.displayoptions > span:nth-child(2)')
+                    video_href = instance_element.find_element_by_css_selector(
+                        'a').get_attribute('href')
                     instances.append({'title': title_element.text.split(
-                        '\n')[0], 'time': time_element.text[1:], 'playtime': playtime_element.text[2:]})
+                        '\n')[0], 'time': time_element.text[1:], 'playtime': playtime_element.text[2:], 'vid': video_href[video_href.rfind('?id=')+4:]})
                 except:
                     pass
                 # print("[INSTANCE] " + instances[-1]['title'])
@@ -230,3 +233,75 @@ for course in courses:
                     print("    [X] %s [남은 시간 %s]" %
                           (task_contents['title'], remain_time_text))
 print("-----------------------------")
+
+answer = input("Do you wanna Viewing?(y/n): ")
+isViewing = True if 'y' in answer else False
+if isViewing:
+    for course in courses:
+        if course['week'] and course['attendances'][course['week']] != [{"title": " ", "ox": " "}]:
+            print("%s 둘러보는 중.." %
+                  (course['title'][:course['title'].rfind('[')]))
+            index = 0
+            for instance in course['instances']:
+                ox = course['attendances'][course['week']][index]['ox']
+                index += 1
+                time = instance['time']
+                ox = 'X'
+                if ox == 'X' and time != "":
+                    print("  [%s] %s 영상을 시청합니다. (%s)" %
+                          (ox, instance['title'], instance['playtime']))
+                    print("    [Play Start] %s~" %
+                          (datetime.datetime.now().strftime('%H:%M:%S')))
+                    video_url = CONFIG['url'] + \
+                        "/mod/vod/viewer.php?id=" + instance['vid']
+                    driver.get(url=video_url)
+                    try:
+                        alert = driver.switch_to.alert
+                        alert.accept()
+                        # print("Alert 1")
+                    except:
+                        # print("Alert Except")
+                        pass
+
+                    sleep(3)
+                    try:
+                        alert = driver.switch_to.alert
+                        alert.accept()
+                        # print("Alert 2")
+                    except:
+                        # print("Alert Except")
+                        pass
+
+                    sleep(3)
+                    try:
+                        alert = driver.switch_to.alert
+                        alert.accept()
+                        # print("Alert 3")
+                    except:
+                        # print("Alert Except")
+                        pass
+
+                    driver.find_element_by_class_name(
+                        'vjs-big-play-button').click()
+                    driver.find_element_by_class_name(
+                        'vjs-mute-control').click()
+
+                    while True:
+                        sleep(5)
+                        time_point = driver.find_element_by_class_name(
+                            'vjs-remaining-time-display').text
+
+                        if time_point == "-0:00":
+                            print("시청 완료 !")
+                            break
+
+                    # driver.close()
+                    # try:
+                    #     alert = driver.switch_to_alert()
+                    #     alert.accept()
+                    #     print("Alert")
+                    # except:
+                    #     print("No Alert")
+
+driver.close()
+print("[*] Ended")
