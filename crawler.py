@@ -236,8 +236,6 @@ print("-----------------------------")
 
 while True:
     answer = input("Do you wanna Viewing?(y/n): ")
-    if 'n' in answer:
-        break
     if 'y' in answer:
         for course in courses:
             if course['week'] and course['attendances'][course['week']] != [{"title": " ", "ox": " "}]:
@@ -303,6 +301,9 @@ while True:
                         #     print("Alert")
                         # except:
                         #     print("No Alert")
+        break
+    elif 'n' in answer:
+        break
 
 driver.close()
 print("[*] Ended")
