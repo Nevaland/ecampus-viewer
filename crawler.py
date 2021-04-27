@@ -246,7 +246,7 @@ while True:
                     ox = course['attendances'][course['week']][index]['ox']
                     index += 1
                     time = instance['time']
-                    if ox == 'X' and time != "":
+                    if ox != 'O' and time != "":
                         print("  [%s] %s 영상을 시청합니다. (%s)" %
                               (ox, instance['title'], instance['playtime']))
                         print("    [Play Start] %s~" %
