@@ -66,6 +66,9 @@ for course_elements in courses_elements:
     course_name_element = course_elements.find_elements_by_css_selector(
         'a > div.course-name > div.course-title > h3')
     course['title'] = course_name_element[0].get_attribute('innerHTML')
+    if '<span' in course['title']:
+        course['title'] = course['title'][:course['title'].rfind(
+            '<span')] + " New!"
     # print("[TITLE] " + course['title'])
 
     # Link
@@ -280,10 +283,18 @@ while True:
                             # print("Alert Except")
                             pass
 
-                        driver.find_element_by_class_name(
-                            'vjs-big-play-button').click()
-                        driver.find_element_by_class_name(
-                            'vjs-mute-control').click()
+                        wait = WebDriverWait(driver, 10)
+                        try:
+                            wait.until(EC.element_to_be_clickable(
+                                (By.CLASS_NAME, 'vjs-big-play-button')))
+                            driver.find_element_by_class_name(
+                                'vjs-big-play-button').click()
+                            wait.until(EC.element_to_be_clickable(
+                                (By.CLASS_NAME, 'vjs-mute-control')))
+                            driver.find_element_by_class_name(
+                                'vjs-mute-control').click()
+                        except:
+                            print("[-] play,mute Button Not Founded")
 
                         while True:
                             sleep(5)
