@@ -15,6 +15,8 @@ import sys
 import os
 from time import sleep
 
+import re
+
 try:
     with open('config.json') as f:
         CONFIG = json.load(f)
@@ -149,11 +151,12 @@ for course in courses:
         url=CONFIG['url'] + '/report/ubcompletion/user_progress_a.php?id=' + course['id'])
 
     attendance_elements = driver.find_elements_by_css_selector(
-        '#region-main > div > div:nth-child(3) > div > div:nth-child(2) > table > tbody > tr')
+        '#ubcompletion-progress-wrapper > div:nth-child(2) > table > tbody > tr')
 
     attendances = {}
+    weeks_num = 0
     for attendance_element in attendance_elements:
-        if len(attendance_element.find_elements_by_css_selector('td')) == 6:
+        if len(attendance_element.find_elements_by_css_selector('td')) == 5:
             weeks_num = int(attendance_element.find_elements_by_css_selector(
                 'td:nth-child(1)')[0].text)
             attendances[weeks_num] = []
@@ -179,20 +182,19 @@ for course in courses:
     tasks_elements = driver.find_elements_by_css_selector(
         '#region-main > div > table > tbody > tr')
 
-    weeks = 1
-    tasks = {weeks: []}
+    tasks = {}
     for row_element in tasks_elements:
         td_elements = row_element.find_elements_by_css_selector('td')
 
-        if len(td_elements) == 1:
-            weeks += 1
-            tasks[weeks] = []
-        else:
+        if len(td_elements) != 1:
+            weekend = int(re.findall("\d+",  td_elements[0].text)[0])
             task = {}
             task['title'] = td_elements[1].text
             task['deadline'] = td_elements[2].text
             task['submit'] = td_elements[3].text
-            tasks[weeks].append(task)
+            if not tasks.get(weekend):
+                tasks[weekend] = []
+            tasks[weekend].append(task)
 
     course['tasks'] = tasks
 
@@ -223,7 +225,7 @@ for course in courses:
             else:
                 print("")
 
-        if course['tasks'] != {1: []} and course['tasks'].get(course['week']):
+        if course['tasks'] and course['tasks'].get(course['week']):
             for task_contents in course['tasks'][course['week']]:
                 if task_contents['submit'] == "제출 완료":
                     print("    [O] %s" % (task_contents['title']))
